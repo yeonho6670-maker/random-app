@@ -24,6 +24,21 @@ def future_fund(product, fund):
     return profit, asset
 
 
+def to_korean(won):
+    """큰 금액을 '1억 2,345만 원' 처럼 읽기 쉽게 바꿔주는 함수"""
+    eok = won // 100_000_000
+    man = (won % 100_000_000) // 10_000
+    rest = won % 10_000
+    parts = []
+    if eok:
+        parts.append(f"{eok:,}억")
+    if man:
+        parts.append(f"{man:,}만")
+    if rest:
+        parts.append(f"{rest:,}")
+    return " ".join(parts) + " 원"
+
+
 # ----------------------------------------
 # 화면 구성
 # ----------------------------------------
@@ -47,6 +62,8 @@ fund = st.slider(
     step=10_000,
     format="%d",
 )
+# 슬라이더 바로 아래에 한글 단위로 크게 보여주기
+st.markdown(f"### 💰 {to_korean(fund)}")
 
 # 버튼: 분석하기
 if st.button("분석하기"):
@@ -62,13 +79,13 @@ if st.button("분석하기"):
         # 결과 텍스트 메시지
         st.success(
             f"'{selected['이름']}'을(를) 현재 자산으로 구매하면 "
-            f"{selected['만기']}년 후 만기일에 {asset:,}원을 가지게 됩니다."
+            f"{selected['만기']}년 후 만기일에 {asset:,}원({to_korean(asset)})을 가지게 됩니다."
         )
 
         # 종합 분석 (테이블)
         st.subheader("종합 분석")
         df = pd.DataFrame(
-            {"순이익": [f"{profit:,}원"], "미래자산": [f"{asset:,}원"]},
+            {"순이익": [to_korean(profit)], "미래자산": [to_korean(asset)]},
             index=[selected["이름"]],
         )
         st.table(df)
